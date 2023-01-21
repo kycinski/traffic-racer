@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -11,28 +14,64 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // My car variables
-  double playerX = 120;
+  // MyCar variables
+  double playerX = 0;
+  double playerY = 0.8;
+
+  List<Car> enemyCarsList = [];
+
+  var leftSide = -0.65;
+  var rightSide = 0.65;
+
+  var sideList = [-0.65, 0.65];
 
   // MyCar control
   void moveLeft() {
     setState(() {
-      playerX = 40;
+      playerX = leftSide;
     });
   }
 
   void moveRight() {
     setState(() {
-      playerX = 200;
+      playerX = rightSide;
     });
   }
 
   void enemyCarsMove() {
-    setState(() {});
+    setState(() {
+      for (var car in enemyCarsList) {
+        car.posY = car.posY + 0.05;
+
+        // Remove car after screen
+        if (car.posY > 2) {
+          enemyCarsList.remove(car);
+        }
+      }
+    });
+  }
+
+  randomNumber(min, max) {
+    Random random = Random();
+    return random.nextInt(max);
+  }
+
+  void createEnemyCar() {
+    var newCar = Car();
+    newCar.posY = -2;
+    newCar.posX = sideList[randomNumber(0, 2)];
+    setState(() {
+      enemyCarsList.add(newCar);
+    });
   }
 
   void startGame() {
-    //...
+    Timer.periodic(Duration(milliseconds: 2000), (timer) {
+      createEnemyCar();
+    });
+    Timer.periodic(Duration(milliseconds: 50), (timer) {
+      enemyCarsMove();
+    });
   }
 
   @override
@@ -64,11 +103,18 @@ class _HomePageState extends State<HomePage> {
                 child: Stack(
                   children: [
                     Car(
-                      left: playerX,
-                      top: 500,
+                      posX: playerX,
+                      posY: playerY,
                       width: carWidth,
                       height: carHeight,
-                    )
+                    ),
+                    for (var car in enemyCarsList)
+                      Car(
+                        width: carWidth,
+                        height: carHeight,
+                        posX: car.posX,
+                        posY: car.posY,
+                      ),
                   ],
                 ),
               ),
