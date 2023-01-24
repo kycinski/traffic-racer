@@ -18,23 +18,40 @@ class _HomePageState extends State<HomePage> {
   double playerX = 0;
   double playerY = 0.8;
 
+  bool gameHasStarted = false;
+
   List<Car> enemyCarsList = [];
 
-  var leftSide = -0.65;
-  var rightSide = 0.65;
+  var createEnemyCarTimer;
+  var enemyCarsMoveTimer;
 
   var sideList = [-0.65, 0.65];
 
   // MyCar control
+  void moveControl(event) {
+    {
+      if (gameHasStarted) {
+        if (event.isKeyPressed(LogicalKeyboardKey.arrowLeft)) {
+          moveLeft();
+        } else if (event.isKeyPressed(LogicalKeyboardKey.arrowRight)) {
+          moveRight();
+        }
+      } else if (event.isKeyPressed(LogicalKeyboardKey.space)) {
+        gameHasStarted = true;
+        startGame();
+      }
+    }
+  }
+
   void moveLeft() {
     setState(() {
-      playerX = leftSide;
+      playerX = sideList[0];
     });
   }
 
   void moveRight() {
     setState(() {
-      playerX = rightSide;
+      playerX = sideList[1];
     });
   }
 
@@ -46,6 +63,15 @@ class _HomePageState extends State<HomePage> {
         // Remove car after screen
         if (car.posY > 2) {
           enemyCarsList.remove(car);
+        }
+
+        // Collision detection
+        if (playerX == car.posX &&
+            playerY - car.posY <= 0.65 &&
+            car.posY - playerY <= 0.65) {
+          enemyCarsMoveTimer.cancel();
+
+          gameHasStarted = false;
         }
       }
     });
@@ -66,10 +92,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   void startGame() {
-    Timer.periodic(Duration(milliseconds: 2000), (timer) {
+    createEnemyCarTimer = Timer.periodic(Duration(milliseconds: 2000), (timer) {
       createEnemyCar();
     });
-    Timer.periodic(Duration(milliseconds: 50), (timer) {
+    enemyCarsMoveTimer = Timer.periodic(Duration(milliseconds: 50), (timer) {
       enemyCarsMove();
     });
   }
@@ -84,15 +110,7 @@ class _HomePageState extends State<HomePage> {
       body: RawKeyboardListener(
         focusNode: FocusNode(),
         autofocus: true,
-        onKey: (event) {
-          if (event.isKeyPressed(LogicalKeyboardKey.arrowLeft)) {
-            moveLeft();
-          } else if (event.isKeyPressed(LogicalKeyboardKey.arrowRight)) {
-            moveRight();
-          } else if (event.isKeyPressed(LogicalKeyboardKey.space)) {
-            startGame();
-          }
-        },
+        onKey: moveControl,
         child: Column(
           children: [
             Center(
