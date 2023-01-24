@@ -12,10 +12,13 @@ class Car extends StatelessWidget {
     return Container(
       alignment: Alignment(posX, posY),
       child: Container(
-        color: Colors.red,
         child: SizedBox(
           height: height,
           width: width,
+          child: Image.asset(
+            'lib/images/car.png',
+            fit: BoxFit.contain,
+          ),
         ),
       ),
     );

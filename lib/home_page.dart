@@ -22,8 +22,8 @@ class _HomePageState extends State<HomePage> {
 
   List<Car> enemyCarsList = [];
 
-  var createEnemyCarTimer;
-  var enemyCarsMoveTimer;
+  Timer? createEnemyCarTimer;
+  Timer? enemyCarsMoveTimer;
 
   var sideList = [-0.65, 0.65];
 
@@ -69,7 +69,7 @@ class _HomePageState extends State<HomePage> {
         if (playerX == car.posX &&
             playerY - car.posY <= 0.65 &&
             car.posY - playerY <= 0.65) {
-          enemyCarsMoveTimer.cancel();
+          enemyCarsMoveTimer?.cancel();
 
           gameHasStarted = false;
         }
@@ -92,10 +92,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   void startGame() {
-    createEnemyCarTimer = Timer.periodic(Duration(milliseconds: 2000), (timer) {
+    createEnemyCarTimer =
+        Timer.periodic(const Duration(milliseconds: 2000), (timer) {
       createEnemyCar();
     });
-    enemyCarsMoveTimer = Timer.periodic(Duration(milliseconds: 50), (timer) {
+    enemyCarsMoveTimer =
+        Timer.periodic(const Duration(milliseconds: 50), (timer) {
       enemyCarsMove();
     });
   }
