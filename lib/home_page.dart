@@ -15,7 +15,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   // MyCar variables
-  double playerX = 0;
+  double playerX = 0.65;
   double playerY = 0.8;
   double carAngle = 0;
 
@@ -81,16 +81,16 @@ class _HomePageState extends State<HomePage> {
 
   void enemyCarsMove() {
     setState(() {
-      for (var car in enemyCarsList) {
+      enemyCarsList.removeWhere((car) {
+        // Remove after screen
+        if (car.posY > 2) {
+          return true;
+        }
+        // else move a car
         car.posY = car.posY + 0.05;
 
-        // Remove car after screen
-        if (car.posY > 2) {
-          enemyCarsList.remove(car);
-        }
-
         // Collision detection
-        if (((playerX <= 0
+        if (((playerX < 0
                     ? car.posX + playerX >= 0.1
                     : car.posX + playerX <= -0.1) ||
                 playerX == car.posX) &&
@@ -98,10 +98,10 @@ class _HomePageState extends State<HomePage> {
           enemyCarsMoveTimer?.cancel();
           changeSideTimer?.cancel();
           createEnemyCarTimer?.cancel();
-
           gameHasStarted = false;
         }
-      }
+        return false;
+      });
     });
   }
 
@@ -112,7 +112,7 @@ class _HomePageState extends State<HomePage> {
 
   void createEnemyCar() {
     var newCar = Car();
-    newCar.posY = -2;
+    newCar.posY = -2.0;
     newCar.posX = sideList[randomNumber(0, 2)];
     setState(() {
       enemyCarsList.add(newCar);
@@ -163,7 +163,7 @@ class _HomePageState extends State<HomePage> {
                         height: carHeight,
                         posX: car.posX,
                         posY: car.posY,
-                        angle: 0,
+                        angle: 0.0,
                       ),
                   ],
                 ),
