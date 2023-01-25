@@ -17,6 +17,7 @@ class _HomePageState extends State<HomePage> {
   // MyCar variables
   double playerX = 0;
   double playerY = 0.8;
+  double carAngle = 0;
 
   bool gameHasStarted = false;
 
@@ -24,6 +25,7 @@ class _HomePageState extends State<HomePage> {
 
   Timer? createEnemyCarTimer;
   Timer? enemyCarsMoveTimer;
+  Timer? changeSideTimer;
 
   var sideList = [-0.65, 0.65];
 
@@ -32,8 +34,10 @@ class _HomePageState extends State<HomePage> {
     {
       if (gameHasStarted) {
         if (event.isKeyPressed(LogicalKeyboardKey.arrowLeft)) {
+          changeSideTimer?.cancel();
           moveLeft();
         } else if (event.isKeyPressed(LogicalKeyboardKey.arrowRight)) {
+          changeSideTimer?.cancel();
           moveRight();
         }
       } else if (event.isKeyPressed(LogicalKeyboardKey.space)) {
@@ -44,14 +48,34 @@ class _HomePageState extends State<HomePage> {
   }
 
   void moveLeft() {
-    setState(() {
-      playerX = sideList[0];
+    changeSideTimer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
+      if (playerX > sideList[0]) {
+        setState(() {
+          playerX -= 0.05;
+          carAngle = -0.3;
+        });
+      }
+
+      if (playerX <= sideList[0]) {
+        changeSideTimer?.cancel();
+        carAngle = 0;
+      }
     });
   }
 
   void moveRight() {
-    setState(() {
-      playerX = sideList[1];
+    changeSideTimer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
+      if (playerX < sideList[1]) {
+        setState(() {
+          playerX += 0.05;
+          carAngle = 0.3;
+        });
+      }
+
+      if (playerX >= sideList[1]) {
+        changeSideTimer?.cancel();
+        carAngle = 0;
+      }
     });
   }
 
@@ -66,10 +90,14 @@ class _HomePageState extends State<HomePage> {
         }
 
         // Collision detection
-        if (playerX == car.posX &&
-            playerY - car.posY <= 0.65 &&
-            car.posY - playerY <= 0.65) {
+        if (((playerX <= 0
+                    ? car.posX + playerX >= 0.1
+                    : car.posX + playerX <= -0.1) ||
+                playerX == car.posX) &&
+            (playerY - car.posY <= 0.65 && car.posY - playerY <= 0.65)) {
           enemyCarsMoveTimer?.cancel();
+          changeSideTimer?.cancel();
+          createEnemyCarTimer?.cancel();
 
           gameHasStarted = false;
         }
@@ -127,6 +155,7 @@ class _HomePageState extends State<HomePage> {
                       posY: playerY,
                       width: carWidth,
                       height: carHeight,
+                      angle: carAngle,
                     ),
                     for (var car in enemyCarsList)
                       Car(
@@ -134,6 +163,7 @@ class _HomePageState extends State<HomePage> {
                         height: carHeight,
                         posX: car.posX,
                         posY: car.posY,
+                        angle: 0,
                       ),
                   ],
                 ),
