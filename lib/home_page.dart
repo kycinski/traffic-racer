@@ -20,6 +20,7 @@ class _HomePageState extends State<HomePage> {
   double playerY = 0.8;
   double carAngle = 0;
 
+  double score = 0;
   bool gameHasStarted = false;
   bool collision = false;
 
@@ -115,6 +116,7 @@ class _HomePageState extends State<HomePage> {
           createEnemyCarTimer?.cancel();
           gameHasStarted = false;
           collision = true;
+          _showDialog();
         }
         return false;
       });
@@ -144,6 +146,7 @@ class _HomePageState extends State<HomePage> {
       createEnemyCarTimer =
           Timer.periodic(const Duration(milliseconds: 2000), (timer) {
         createEnemyCar();
+        score += 1;
       });
       enemyCarsMoveTimer =
           Timer.periodic(const Duration(milliseconds: 50), (timer) {
@@ -154,10 +157,24 @@ class _HomePageState extends State<HomePage> {
 
   void resetGame() {
     setState(() {
+      Navigator.pop(context);
       enemyCarsList.clear();
       playerX = 0.65;
       carAngle = 0;
+      score = 0;
     });
+  }
+
+  void _showDialog() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Center(
+              child: Text("GAME OVER\n SCORE: $score"),
+            ),
+          );
+        });
   }
 
   @override
@@ -189,13 +206,6 @@ class _HomePageState extends State<HomePage> {
                   color: Colors.black,
                   child: Stack(
                     children: [
-                      Center(
-                        child: Text(
-                          gameHasStarted ? "" : startText,
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 24),
-                        ),
-                      ),
                       Car(
                         posX: playerX,
                         posY: playerY,
@@ -211,6 +221,14 @@ class _HomePageState extends State<HomePage> {
                           posY: car.posY,
                           angle: 0.0,
                         ),
+                      Container(
+                        alignment: Alignment(0, -0.5),
+                        child: Text(
+                          gameHasStarted ? score.toString() : startText,
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 24),
+                        ),
+                      ),
                     ],
                   ),
                 ),
