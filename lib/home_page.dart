@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'car.dart';
 
@@ -30,14 +31,12 @@ class _HomePageState extends State<HomePage> {
   var sideList = [-0.65, 0.65];
 
   // MyCar control
-  void moveControl(event) {
+  void keyboardControl(event) {
     {
       if (gameHasStarted) {
         if (event.isKeyPressed(LogicalKeyboardKey.arrowLeft)) {
-          changeSideTimer?.cancel();
           moveLeft();
         } else if (event.isKeyPressed(LogicalKeyboardKey.arrowRight)) {
-          changeSideTimer?.cancel();
           moveRight();
         }
       } else if (event.isKeyPressed(LogicalKeyboardKey.space)) {
@@ -47,7 +46,21 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void touchControl(details) {
+    if (gameHasStarted) {
+      if (details.localPosition.dx < (MediaQuery.of(context).size.width / 2)) {
+        moveLeft();
+      } else {
+        moveRight();
+      }
+    } else {
+      gameHasStarted = true;
+      startGame();
+    }
+  }
+
   void moveLeft() {
+    changeSideTimer?.cancel();
     changeSideTimer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
       if (playerX > sideList[0]) {
         setState(() {
@@ -64,6 +77,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void moveRight() {
+    changeSideTimer?.cancel();
     changeSideTimer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
       if (playerX < sideList[1]) {
         setState(() {
@@ -133,43 +147,51 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     Size mediaQuery = MediaQuery.of(context).size;
-    double carWidth = mediaQuery.width * 0.1;
+    double totalWidth = mediaQuery.width;
+    double carWidth = totalWidth * 1 / 3;
     double carHeight = mediaQuery.height * 0.25;
+    if (kIsWeb) {
+      carWidth = mediaQuery.width * 0.1;
+      totalWidth = mediaQuery.width * 0.3;
+    }
     return Scaffold(
       backgroundColor: Colors.green,
       body: RawKeyboardListener(
         focusNode: FocusNode(),
         autofocus: true,
-        onKey: moveControl,
-        child: Column(
-          children: [
-            Center(
-              child: Container(
-                width: mediaQuery.width * 0.3,
-                height: mediaQuery.height,
-                color: Colors.black,
-                child: Stack(
-                  children: [
-                    Car(
-                      posX: playerX,
-                      posY: playerY,
-                      width: carWidth,
-                      height: carHeight,
-                      angle: carAngle,
-                    ),
-                    for (var car in enemyCarsList)
+        onKey: keyboardControl,
+        child: GestureDetector(
+          onTapDown: touchControl,
+          child: Column(
+            children: [
+              Center(
+                child: Container(
+                  width: totalWidth,
+                  height: mediaQuery.height,
+                  color: Colors.black,
+                  child: Stack(
+                    children: [
                       Car(
+                        posX: playerX,
+                        posY: playerY,
                         width: carWidth,
                         height: carHeight,
-                        posX: car.posX,
-                        posY: car.posY,
-                        angle: 0.0,
+                        angle: carAngle,
                       ),
-                  ],
+                      for (var car in enemyCarsList)
+                        Car(
+                          width: carWidth,
+                          height: carHeight,
+                          posX: car.posX,
+                          posY: car.posY,
+                          angle: 0.0,
+                        ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
