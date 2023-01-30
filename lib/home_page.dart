@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   double carAngle = 0;
 
   bool gameHasStarted = false;
+  bool collision = false;
 
   List<Car> enemyCarsList = [];
 
@@ -113,6 +114,7 @@ class _HomePageState extends State<HomePage> {
           changeSideTimer?.cancel();
           createEnemyCarTimer?.cancel();
           gameHasStarted = false;
+          collision = true;
         }
         return false;
       });
@@ -134,13 +136,27 @@ class _HomePageState extends State<HomePage> {
   }
 
   void startGame() {
-    createEnemyCarTimer =
-        Timer.periodic(const Duration(milliseconds: 2000), (timer) {
-      createEnemyCar();
-    });
-    enemyCarsMoveTimer =
-        Timer.periodic(const Duration(milliseconds: 50), (timer) {
-      enemyCarsMove();
+    if (collision) {
+      resetGame();
+      collision = false;
+      gameHasStarted = false;
+    } else {
+      createEnemyCarTimer =
+          Timer.periodic(const Duration(milliseconds: 2000), (timer) {
+        createEnemyCar();
+      });
+      enemyCarsMoveTimer =
+          Timer.periodic(const Duration(milliseconds: 50), (timer) {
+        enemyCarsMove();
+      });
+    }
+  }
+
+  void resetGame() {
+    setState(() {
+      enemyCarsList.clear();
+      playerX = 0.65;
+      carAngle = 0;
     });
   }
 
@@ -150,9 +166,11 @@ class _HomePageState extends State<HomePage> {
     double totalWidth = mediaQuery.width;
     double carWidth = totalWidth * 1 / 3;
     double carHeight = mediaQuery.height * 0.25;
+    String startText = "TAP TO PLAY";
     if (kIsWeb) {
       carWidth = mediaQuery.width * 0.1;
       totalWidth = mediaQuery.width * 0.3;
+      startText = "PRESS SPACE TO START";
     }
     return Scaffold(
       backgroundColor: Colors.green,
@@ -171,6 +189,13 @@ class _HomePageState extends State<HomePage> {
                   color: Colors.black,
                   child: Stack(
                     children: [
+                      Center(
+                        child: Text(
+                          gameHasStarted ? "" : startText,
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 24),
+                        ),
+                      ),
                       Car(
                         posX: playerX,
                         posY: playerY,
