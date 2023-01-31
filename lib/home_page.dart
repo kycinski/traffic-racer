@@ -20,7 +20,7 @@ class _HomePageState extends State<HomePage> {
   double playerY = 0.8;
   double carAngle = 0;
 
-  double score = 0;
+  int score = 0;
   bool gameHasStarted = false;
   bool collision = false;
 
@@ -102,8 +102,8 @@ class _HomePageState extends State<HomePage> {
         if (car.posY > 2) {
           return true;
         }
-        // else move a car
-        car.posY = car.posY + 0.05;
+        // else move a car (speed control)
+        car.posY = car.posY + 0.05 * (score * 0.1 + 1);
 
         // Collision detection
         if (((playerX < 0
@@ -140,8 +140,6 @@ class _HomePageState extends State<HomePage> {
   void startGame() {
     if (collision) {
       resetGame();
-      collision = false;
-      gameHasStarted = false;
     } else {
       createEnemyCarTimer =
           Timer.periodic(const Duration(milliseconds: 2000), (timer) {
@@ -163,13 +161,20 @@ class _HomePageState extends State<HomePage> {
       carAngle = 0;
       score = 0;
     });
+    gameHasStarted = false;
+    collision = false;
   }
 
   void _showDialog() {
     showDialog(
+        barrierDismissible: false,
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
+            actions: [
+              ElevatedButton(
+                  onPressed: resetGame, child: const Text("Play again!"))
+            ],
             title: Center(
               child: Text("GAME OVER\n SCORE: $score"),
             ),
@@ -222,7 +227,7 @@ class _HomePageState extends State<HomePage> {
                           angle: 0.0,
                         ),
                       Container(
-                        alignment: Alignment(0, -0.5),
+                        alignment: const Alignment(0, -0.5),
                         child: Text(
                           gameHasStarted ? score.toString() : startText,
                           style: const TextStyle(
