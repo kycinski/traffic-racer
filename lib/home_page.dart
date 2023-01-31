@@ -20,7 +20,7 @@ class _HomePageState extends State<HomePage> {
   double playerY = 0.8;
   double carAngle = 0;
 
-  int score = 0;
+  double score = 0;
   bool gameHasStarted = false;
   bool collision = false;
 
@@ -66,7 +66,7 @@ class _HomePageState extends State<HomePage> {
     changeSideTimer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
       if (playerX > sideList[0]) {
         setState(() {
-          playerX -= 0.05;
+          playerX -= 0.05 * (score * 0.1 + 1);
           carAngle = -0.3;
         });
       }
@@ -83,7 +83,7 @@ class _HomePageState extends State<HomePage> {
     changeSideTimer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
       if (playerX < sideList[1]) {
         setState(() {
-          playerX += 0.05;
+          playerX += 0.05 * (score * 0.1 + 1);
           carAngle = 0.3;
         });
       }
@@ -176,7 +176,7 @@ class _HomePageState extends State<HomePage> {
                   onPressed: resetGame, child: const Text("Play again!"))
             ],
             title: Center(
-              child: Text("GAME OVER\n SCORE: $score"),
+              child: Text("GAME OVER\n SCORE: ${score.toStringAsFixed(0)}"),
             ),
           );
         });
@@ -229,7 +229,7 @@ class _HomePageState extends State<HomePage> {
                       Container(
                         alignment: const Alignment(0, -0.5),
                         child: Text(
-                          gameHasStarted ? score.toString() : startText,
+                          gameHasStarted ? score.toStringAsFixed(0) : startText,
                           style: const TextStyle(
                               color: Colors.white, fontSize: 24),
                         ),
