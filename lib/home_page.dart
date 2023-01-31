@@ -73,6 +73,7 @@ class _HomePageState extends State<HomePage> {
 
       if (playerX <= sideList[0]) {
         changeSideTimer?.cancel();
+        playerX = sideList[0];
         carAngle = 0;
       }
     });
@@ -90,6 +91,7 @@ class _HomePageState extends State<HomePage> {
 
       if (playerX >= sideList[1]) {
         changeSideTimer?.cancel();
+        playerX = sideList[1];
         carAngle = 0;
       }
     });
